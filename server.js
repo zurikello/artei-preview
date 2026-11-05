@@ -16,7 +16,19 @@ const transporter = nodemailer.createTransport({
   port: SMTP_PORT,
   secure: SMTP_PORT === 465,
   auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  // fail fast instead of leaving the visitor waiting for minutes
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 15000,
 });
+
+// log once at startup whether the mail server is reachable
+if (process.env.SMTP_HOST) {
+  transporter.verify().then(
+    () => console.log(`smtp ok: ${process.env.SMTP_HOST}:${SMTP_PORT}`),
+    (err) => console.error(`smtp check failed (${process.env.SMTP_HOST}:${SMTP_PORT}): ${err && (err.code || '')} ${err && err.message}`),
+  );
+}
 
 const app = express();
 app.disable('x-powered-by');
