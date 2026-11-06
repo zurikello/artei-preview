@@ -104,13 +104,14 @@ app.post('/api/lead', express.json({ limit: '20kb' }), async (req, res) => {
   ].join('\n');
 
   try {
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: { name: 'Сайт arteioptic.ru', address: MAIL_FROM },
       to: MAIL_TO,
       replyTo: { name: lead.name, address: lead.email },
       subject: `Заявка с сайта: ${lead.topic}, ${lead.company}`,
       text,
     });
+    console.log(`mail sent: ${info.messageId} to ${MAIL_TO}; server: ${info.response}`);
     res.json({ ok: true });
   } catch (err) {
     console.error('mail error:', err && err.message);
